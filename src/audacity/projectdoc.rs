@@ -5,25 +5,37 @@ use rusqlite::{Connection, DatabaseName};
 use rusqlite::blob::Blob;
 
 use crate::audacity::tagdict::TagDict;
-use crate::audacity::fields::{FieldType, ReadDocField};
+use crate::audacity::fields::{CharSize, FieldType, ReadDocField};
 use crate::audacity::decoder::Decoder;
 use crate::tagstack::{Tag, TagStack};
 use crate::structure::*;
 
 
-pub struct ProjectDocReader {}
+pub struct ProjectDocReader {
+    char_size: u8
+}
 
 
 impl ProjectDocReader {
-    pub fn new() -> Self {
-        Self { }
+    pub fn new(cs: u8) -> Self {
+        Self {
+            char_size: cs
+        }
+    }
+}
+
+
+impl CharSize for ProjectDocReader {
+    fn chs(&self) -> u8 {
+        self.char_size
     }
 }
 
 
 impl ReadDocField for ProjectDocReader {
     fn read_field(&self, blob: &mut Blob) -> FieldType {
-        match blob.field_type_code() {
+        let ftc = blob.field_type_code();
+        match ftc {
              0 => self.char_size(blob),
              1 => self.start_tag(blob),
              2 => self.end_tag(blob),
@@ -60,11 +72,11 @@ impl ReadDocField for ProjectDocReader {
     fn str(&self, blob: &mut Blob) -> FieldType {
         let id = blob.short();
         let size = blob.integer();
-        FieldType::Str { id: id, size: size, value: blob.string(size as usize).clone() }
+        FieldType::Str { id: id, size: size, value: blob.string(size as usize, self.chs()).clone() }
     }
 
     fn integer(&self, blob: &mut Blob) -> FieldType {
-        FieldType::Int { id: blob.short(), value: blob.short() }
+        FieldType::Int { id: blob.short(), value: blob.integer() }
     }
 
     fn boolean(&self, blob: &mut Blob) -> FieldType {
@@ -99,12 +111,12 @@ impl ReadDocField for ProjectDocReader {
 
     fn data(&self, blob: &mut Blob) -> FieldType {
         let size = blob.integer();
-        FieldType::Data { size: size, value: blob.string(size as usize).clone() }
+        FieldType::Data { size: size, value: blob.string(size as usize, self.chs()).clone() }
     }
 
     fn raw(&self, blob: &mut Blob) -> FieldType {
         let size = blob.integer();
-        FieldType::Raw { size: size, value: blob.string(size as usize).clone() }
+        FieldType::Raw { size: size, value: blob.string(size as usize, self.chs()).clone() }
     }
 
     fn push(&self, _blob: &mut Blob) -> FieldType {
@@ -118,13 +130,12 @@ impl ReadDocField for ProjectDocReader {
     fn name(&self, blob: &mut Blob) -> FieldType {
         let id = blob.short();
         let size = blob.short();
-        FieldType::Name { id: id, size: size, value: blob.string(size as usize) }
+        FieldType::Name { id: id, size: size, value: blob.string(size as usize, self.chs()) }
     }
 }
 
 
 pub struct ProjectDoc {
-    char_size: u8,
     reader: ProjectDocReader,
     tagdict: TagDict,
     tags: TagStack,
@@ -133,11 +144,10 @@ pub struct ProjectDoc {
 
 
 impl ProjectDoc {
-    pub fn new() -> Self {
+    pub fn new(tagdict: TagDict) -> Self {
         Self {
-            char_size: 0,
-            reader: ProjectDocReader::new(),
-            tagdict: TagDict::new(),
+            reader: ProjectDocReader::new(tagdict.chs()),
+            tagdict: tagdict,
             tags: TagStack::new(),
             raw: String::new(),
         }
@@ -148,11 +158,9 @@ impl ProjectDoc {
         let mut blob = con.blob_open(DatabaseName::Main, "project",
             "doc", 1, true).expect("Failed to read blob");
 
-        let _ = self.tagdict.decode(&con);
-
         while (blob.stream_position().expect("Cannot read position") as usize) < blob.len() {
             match self.reader.read_field(&mut blob) {
-                FieldType::CharSize { value } => self.char_size = value,
+                FieldType::CharSize { value } => { self.reader.char_size = value; },
                 FieldType::StartTag { id } => { self.add_tag(id); },
                 FieldType::EndTag { id: _ } => { self.tags.decrease_level(); },
                 FieldType::Str { id, size: _, value } => { self.add_attribute(id, value); },

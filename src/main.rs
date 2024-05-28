@@ -1,10 +1,12 @@
 use std::io;
-//use std::env;
+use aup3conv::project::Project;
+use std::env;
 
 
 fn main() -> io::Result<()> {
-    //let argv: Vec<String> = env::args().collect();
+    let argv: Vec<String> = env::args().collect();
 
-    println!("Welcome");
+    let project = Project::new(&argv[1]);
+    project.list_labels();
     Ok(())
 }

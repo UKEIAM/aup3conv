@@ -6,7 +6,7 @@ pub enum FieldType {
     StartTag { id: i16 },
     EndTag { id: i16 },
     Str { id: i16, size: i32, value: String },
-    Int { id: i16, value: i16 },
+    Int { id: i16, value: i32 },
     Bool { id: i16, value: bool },
     Long { id: i16, value: i32 },
     LongLong { id: i16, value: i64},
@@ -42,7 +42,11 @@ pub trait ReadDocField {
 }
 
 
-pub trait ReadDictField {
+pub trait CharSize {
+    fn chs(&self) -> u8;
+}
+
+pub trait ReadDictField: CharSize {
     fn read_field(&self, blob: &mut Blob) -> FieldType;
     fn char_size(&self, blob: &mut Blob) -> FieldType;
     fn name(&self, blob: &mut Blob) -> FieldType;

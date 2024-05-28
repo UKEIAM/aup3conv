@@ -9,7 +9,7 @@ pub trait Decoder {
     fn integer(&mut self) -> i32;
     fn longlong(&mut self) -> i64;
     fn double(&mut self) -> f64;
-    fn string(&mut self, size: usize) -> String;
+    fn string(&mut self, size: usize, width: u8) -> String;
     fn field_type_code(&mut self) -> u8;
 }
 
@@ -78,15 +78,31 @@ impl Decoder for Blob<'_> {
         val[0]
     }
 
-    fn string(&mut self, size: usize) -> String {
-        let mut out = String::new();
+    fn string(&mut self, size: usize, width: u8) -> String {
         let buffer = self.nbytes(size);
-        let (pre, chars, post) = unsafe { buffer.align_to::<char>() };
-        assert_eq!(pre, []);
-        assert_eq!(post, []);
+        
+        match width {
+            1 => {
+                String::from_utf8(buffer).unwrap()
+            },
 
-        out.extend(chars.iter());
-        out
+            2 => { 
+                let (pre, buf, post) = unsafe { buffer.align_to::<u16>() };
+                assert_eq!(pre, []);
+                assert_eq!(post, []);
+                String::from_utf16(&buf).unwrap()
+            },
+            4 => {
+                let mut out = String::new();
+                let (pre, buf, post) = unsafe { buffer.align_to::<char>() };
+                assert_eq!(pre, []);
+                assert_eq!(post, []);
+                out.extend(buf.iter());
+                out
+            },
+
+            _ => panic!("Bad char size: {}", width)
+        }
     }
 
     fn field_type_code(&mut self) -> u8 {

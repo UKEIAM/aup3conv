@@ -2,6 +2,7 @@ use std::io::{Seek, Read, SeekFrom};
 use rusqlite::{DatabaseName,Connection};
 
 use crate::audacity::projectdoc::ProjectDoc;
+use crate::audacity::tagdict::TagDict;
 use crate::structure::*;
 use crate::audacity::audio::{AudioLoader, AudioProcessor};
 
@@ -18,10 +19,13 @@ impl Project {
     pub fn new(path: &str) -> Self {
         let msg = format!("Failed to open path \"{}\"", path);
         let con = Connection::open(path).expect(&msg);
-        let mut doc = ProjectDoc::new();
 
+        let mut tagdict = TagDict::new();
+        tagdict.decode(&con);
+
+        let mut doc = ProjectDoc::new(tagdict);
         let (fps, labels, wb) = match doc.decode(&con) {
-            Ok(()) => { 
+            Ok(()) => {
 
                 let fps = match doc.parse_sample_rate() {
                     Some(val) => val,
@@ -34,6 +38,14 @@ impl Project {
         };
 
         Self { path: path.to_string(), fps: fps, labels: labels, waveblocks: wb }
+    }
+
+    pub fn list_labels(&self) {
+        if let Some(labels) = &self.labels {
+            for item in labels.iter() {
+                println!("Title: {} -- ({}, {})", item.title, item.t, item.t1);
+            }
+        }
     }
 }
 
@@ -52,12 +64,14 @@ impl AudioProcessor for Project {
 impl AudioLoader for Project {
     fn load_audio_slice(&self, start: u64, stop: u64, buffer: &mut Vec<f32>) {
 
-        let start_block = self.find_waveblock(start).unwrap(); 
+        let start_block = self.find_waveblock(start).unwrap();
         let stop_block = self.find_waveblock(stop).unwrap();
- 
+
         let mut buf = vec![0u8; 4*buffer.len()];
 
-        let con = Connection::open(self.path.clone()).expect("ASD:J:");
+        let con = Connection::open(self.path.clone())
+            .expect("Cannot open database");
+
         if start_block == stop_block {
             let mut blob = con.blob_open(DatabaseName::Main, "sampleblocks",
                 "samples", start_block as i64, true)
