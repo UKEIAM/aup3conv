@@ -39,14 +39,6 @@ impl Project {
 
         Self { path: path.to_string(), fps: fps, labels: labels, waveblocks: wb }
     }
-
-    pub fn list_labels(&self) {
-        if let Some(labels) = &self.labels {
-            for item in labels.iter() {
-                println!("Title: {} -- ({}, {})", item.title, item.t, item.t1);
-            }
-        }
-    }
 }
 
 
