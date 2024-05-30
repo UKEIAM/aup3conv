@@ -3,3 +3,4 @@
 .vimrc
 /data
 /target
+__pycache__
