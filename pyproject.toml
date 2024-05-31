@@ -17,6 +17,13 @@ maturin = "^1.5.1"
 [tool.poetry.group.development.dependencies]
 pytest = "^8.2.1"
 
+
+[tool.poetry.group.notebook]
+optional = true
+
+[tool.poetry.group.notebook.dependencies]
+ipykernel = "^6.29.4"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
