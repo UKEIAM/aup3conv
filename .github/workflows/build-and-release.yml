@@ -33,8 +33,7 @@ jobs:
             target: aarch64
           - runner: ubuntu-latest
             target: armv7
-          - runner: ubuntu-latest
-            target: s390x
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
