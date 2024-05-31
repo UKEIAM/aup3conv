@@ -83,3 +83,16 @@ impl TagDict {
         self.read.chs()
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn get_started() {
+        let con = Connection::open("data/test-project.aup3").expect("open failed");
+        let mut tags = TagDict::new();
+        tags.decode(&con);
+    }
+}
