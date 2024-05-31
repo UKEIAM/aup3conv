@@ -1,7 +1,7 @@
 use std::io::{Seek, Read, SeekFrom};
 use std::cmp::Ordering;
 
-use rusqlite::{DatabaseName,Connection};
+use rusqlite::{DatabaseName,Connection,OpenFlags};
 use pyo3::prelude::*;
 use pyo3::exceptions::PyValueError;
 
@@ -35,7 +35,11 @@ pub struct Project {
 impl Project {
     pub fn open(path: &str) -> Self {
         let msg = format!("Failed to open path \"{}\"", path);
-        let con = Connection::open(path).expect(&msg);
+        let con = Connection::open_with_flags(
+            path,
+            OpenFlags::SQLITE_OPEN_READ_ONLY
+            | OpenFlags::SQLITE_OPEN_NO_MUTEX)
+            .expect(&msg);
 
         let mut tagdict = TagDict::new();
         tagdict.decode(&con);
