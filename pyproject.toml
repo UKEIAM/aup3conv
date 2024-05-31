@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "aup3conv"
+version = "0.0.2"
+description = "Scrape Audacity project files"
+authors = ["Michael Blaß <m.blass@uke.de>"]
+readme = "README.md"
+keywords = ["audio", "analysis", "audacity", "parsing"]
+
+[tool.poetry.urls]
+repository = "https://github.com/UKEIAM/aup3conv"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+maturin = "^1.5.1"
+
+
+[tool.poetry.group.development.dependencies]
+pytest = "^8.2.1"
+
+
+[tool.poetry.group.notebook]
+optional = true
+
+[tool.poetry.group.notebook.dependencies]
+ipykernel = "^6.29.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

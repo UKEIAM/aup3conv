@@ -1,4 +1,6 @@
-/target
-.vimrc
 *.raw
+.python-version
+.vimrc
 /data
+/target
+__pycache__

@@ -2,6 +2,7 @@ use rusqlite::{Connection, DatabaseName,Result};
 use std::io::Read;
 use crate::structure::WaveBlock;
 
+pub const MAX_SAMPLE_BLOCK_SIZE: usize = 1048576;
 
 #[derive(Debug)]
 pub struct FakeBlock {
@@ -31,22 +32,7 @@ pub trait AudioProcessor {
 }
 
 pub trait AudioLoader: AudioProcessor {
-    fn find_waveblock(&self, sample: u64) -> Option<u64> {
-        match self.get_waveblocks() {
-            Some(blocks) => {
-                for i in 1..blocks.len() {
-                    if sample*4 < blocks[i].start {
-                        return Some(blocks[i-1].blockid);
-                    }
-                }
-                None
-            },
-            None => None
-        }
-    }
-
-    fn load_audio_slice(&self, start: u64, stop: u64, buffer: &mut Vec<f32>);
-
+    fn load_audio_slice(&self, start: f64, stop: f64, buffer: &mut Vec<f32>) -> Result<(), ()>;
 
     fn load_sampleblock(&self, con: &Connection, block_id: usize) -> Result<SampleBlock> {
 
