@@ -1,17 +1,34 @@
 use std::io::{Seek, Read, SeekFrom};
+use std::cmp::Ordering;
+
 use rusqlite::{DatabaseName,Connection};
+use pyo3::prelude::*;
+use pyo3::exceptions::PyValueError;
 
 use crate::audacity::projectdoc::ProjectDoc;
 use crate::audacity::tagdict::TagDict;
 use crate::structure::*;
-use crate::audacity::audio::{AudioLoader, AudioProcessor};
+use crate::audacity::audio::{AudioLoader, AudioProcessor, MAX_SAMPLE_BLOCK_SIZE};
+use crate::utils;
 
 
+
+#[pyclass]
 pub struct Project {
+
+    #[pyo3(get)]
     path: String,
+
+    #[pyo3(get)]
     fps: i64,
-    labels: Option<Vec<Label>>,
+
+    #[pyo3(get)]
+    pub labels: Option<Vec<Label>>,
+
+    #[pyo3(get)]
     waveblocks: Option<Vec<WaveBlock>>,
+
+    con: Connection
 }
 
 
@@ -37,7 +54,42 @@ impl Project {
             Err(err) => panic!("Error decoding project document: {}", err)
         };
 
-        Self { path: path.to_string(), fps: fps, labels: labels, waveblocks: wb }
+        Self { path: path.to_string(), fps: fps, labels: labels, waveblocks: wb, con: con }
+    }
+}
+
+
+#[pymethods]
+impl Project {
+    fn __str__(&self) -> String {
+        format!("Project(path={})", self.path)
+    }
+
+    fn __repr__(&self) -> String {
+        self.__str__()
+    }
+
+    fn load_waveblock(&self, block_id: i64) -> PyResult<Vec<f32>> {
+        let mut blob = self.con.blob_open(DatabaseName::Main, "sampleblocks",
+            "samples", block_id, true)
+            .expect("Cannot read blob");
+
+        let mut buff = vec![0u8; 1048576];
+        blob.read(&mut buff).expect("cannot read blob");
+
+        let mut out = Vec::<f32>::new();
+        match bytes_to_audio(&mut buff, &mut out) {
+            Err(_) => Err(PyValueError::new_err("Could not align bytes to float.")),
+                _ => Ok(out)
+        }
+    }
+
+    fn load_slice_from_label(&self, label: &Label) -> PyResult<Vec<f32>> {
+        let mut out = Vec::<f32>::new();
+        match self.load_audio_slice(label.t, label.t1, &mut out) {
+            Err(_) => Err(PyValueError::new_err("Could not do it")),
+            _ => Ok(out)
+        }
     }
 }
 

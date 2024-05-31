@@ -1,4 +1,5 @@
 use std::io;
+use pyo3::prelude::*;
 use crate::tagstack::Tag;
 // pub struct Project {
 //     xmlns: String,
@@ -21,7 +22,7 @@ use crate::tagstack::Tag;
 // pub struct Effects {
 //     active: bool,
 // }
-// 
+//
 // enum Tracks {
 //     WaveTrack(WaveTrack),
 //     LabelTrack(LabelTrack),
@@ -60,9 +61,13 @@ use crate::tagstack::Tag;
 //     numsamples: u64,
 //     blocks: Vec<WaveBlock>,
 // }
-#[derive(Debug)]
+#[derive(Debug,Clone)]
+#[pyclass]
 pub struct WaveBlock {
-    pub start: u64,
+    #[pyo3(get)]
+    pub start: usize,
+
+    #[pyo3(get, name="block_id")]
     pub blockid: u64,
 }
 
@@ -70,12 +75,23 @@ impl WaveBlock {
     pub fn from_tag(tag: &Tag) -> io::Result<Self> {
         let start = tag.attributes.get("start")
             .expect("Key 'start' not in tag attributes")
-            .parse::<u64>().unwrap();
+            .parse::<usize>().unwrap();
         let bid = tag.attributes.get("blockid")
             .expect("Key 'blockid' not in tag attributes")
             .parse::<u64>().unwrap();
         Ok(Self { start: start, blockid: bid })
 
+    }
+}
+
+#[pymethods]
+impl WaveBlock{
+    fn __str__(&self) -> String {
+        format!("WaveBlock(block_id={}, start={})", self.blockid, self.start)
+    }
+
+    fn __repr__(&self) -> String {
+        self.__str__()
     }
 }
 // 
@@ -93,9 +109,16 @@ impl WaveBlock {
 // }
 
 #[derive(Debug)]
+#[derive(Clone)]
+#[pyclass]
 pub struct Label {
+    #[pyo3(get, name="start")]
     pub t: f64,
+
+    #[pyo3(get, name="stop")]
     pub t1: f64,
+
+    #[pyo3(get)]
     pub title: String,
 }
 
@@ -110,5 +133,16 @@ impl Label {
             .expect("Key 't1' not in tag attributes")
             .parse::<f64>().unwrap();
         Ok(Self { title: title.clone(), t: t, t1: t1 })
+    }
+}
+
+#[pymethods]
+impl Label {
+    fn __str__(&self) -> String {
+        format!("Label(title='{}', start={}, stop={})", self.title, self.t, self.t1)
+    }
+
+    fn __repr__(&self) -> String {
+        self.__str__()
     }
 }
