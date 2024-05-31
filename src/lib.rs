@@ -12,13 +12,13 @@ use crate::structure::Label;
 
 #[pyfunction]
 fn open(path: String) -> PyResult<Project> {
-    let project = Project::new(&path);
+    let project = Project::open(&path);
     Ok(project)
 }
 
 #[pyfunction]
 fn get_labels(path: String) -> PyResult<Option<Vec<Label>>> {
-    let project = Project::new(&path);
+    let project = Project::open(&path);
     Ok(project.labels)
 }
 

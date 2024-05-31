@@ -33,7 +33,7 @@ pub struct Project {
 
 
 impl Project {
-    pub fn new(path: &str) -> Self {
+    pub fn open(path: &str) -> Self {
         let msg = format!("Failed to open path \"{}\"", path);
         let con = Connection::open(path).expect(&msg);
 
@@ -195,7 +195,7 @@ mod tests {
 
     #[test]
     fn audioloader_project_load_audio_slice() {
-        let pro = Project::new("data/test-project.aup3");
+        let pro = Project::open("data/test-project.aup3");
         let mut out = Vec::<f32>::new();
 
         match pro.labels {
