@@ -27,7 +27,7 @@ pub struct SampleBlock {
 }
 
 pub trait AudioProcessor {
-    fn fps(&self) -> i64;
+    fn fps(&self) -> u32;
     fn get_waveblocks(&self) -> Option<&Vec<WaveBlock>>;
 }
 

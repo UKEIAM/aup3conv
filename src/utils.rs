@@ -1,8 +1,8 @@
-pub fn time_to_frame(time: f64, fps: i64) -> u64 {
+pub fn time_to_frame(time: f64, fps: u32) -> u64 {
     (time * fps as f64).round() as u64
 }
 
-pub fn time_to_byte(time: f64, fps: i64) -> usize {
+pub fn time_to_byte(time: f64, fps: u32) -> usize {
     (time_to_frame(time, fps) * 4) as usize
 }
 

@@ -20,7 +20,7 @@ pub struct Project {
     path: String,
 
     #[pyo3(get)]
-    fps: i64,
+    fps: u32,
 
     #[pyo3(get)]
     pub labels: Option<Vec<Label>>,
@@ -95,7 +95,7 @@ impl Project {
 
 
 impl AudioProcessor for Project {
-    fn fps(&self) -> i64 {
+    fn fps(&self) -> u32 {
         self.fps
     }
 

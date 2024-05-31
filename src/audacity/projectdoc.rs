@@ -209,10 +209,10 @@ impl ProjectDoc {
         Ok(Some(out))
     }
 
-    pub fn parse_sample_rate(&mut self) -> Option<i64> {
+    pub fn parse_sample_rate(&mut self) -> Option<u32> {
         match self.get_tag_by_name("project") {
             Some(tag) => match tag.attributes.get("rate") {
-                Some(rate) => match rate.parse::<i64>() {
+                Some(rate) => match rate.parse::<u32>() {
                     Ok(val) => Some(val),
                     Err(_) => None,
                 },
