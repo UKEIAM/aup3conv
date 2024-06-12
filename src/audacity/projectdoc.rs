@@ -222,6 +222,17 @@ impl ProjectDoc {
         }
     }
 
+    pub fn parse_sequences(&mut self) -> Result<Option<Vec<Sequence>>> {
+        let mut out = Vec::<Sequence>::new();
+        for tag in self.tags.stack.iter() {
+            if tag.name == "sequence" { out.push(Sequence::from_tag(&tag)?) };
+        }
+        if out.is_empty() {
+            return Ok(None)
+        }
+        Ok(Some(out))
+    }
+
     pub fn parse_waveblocks(&mut self) -> Result<Option<Vec<WaveBlock>>> {
         let mut out = Vec::<WaveBlock>::new();
         for tag in self.tags.stack.iter() {

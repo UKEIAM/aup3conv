@@ -28,6 +28,9 @@ pub struct Project {
     #[pyo3(get)]
     waveblocks: Option<Vec<WaveBlock>>,
 
+    #[pyo3(get)]
+    sequences: Option<Vec<Sequence>>,
+
     con: Connection
 }
 
@@ -37,15 +40,14 @@ impl Project {
         let msg = format!("Failed to open path \"{}\"", path);
         let con = Connection::open_with_flags(
             path,
-            OpenFlags::SQLITE_OPEN_READ_ONLY
-            | OpenFlags::SQLITE_OPEN_NO_MUTEX)
+            OpenFlags::SQLITE_OPEN_READ_ONLY)
             .expect(&msg);
 
         let mut tagdict = TagDict::new();
         tagdict.decode(&con);
 
         let mut doc = ProjectDoc::new(tagdict);
-        let (fps, labels, wb) = match doc.decode(&con) {
+        let (fps, labels, wb, seq) = match doc.decode(&con) {
             Ok(()) => {
 
                 let fps = match doc.parse_sample_rate() {
@@ -53,12 +55,28 @@ impl Project {
                     None => panic!("Parsing failed")
                 };
 
-                (fps, doc.parse_labels().unwrap(), doc.parse_waveblocks().unwrap())
+                (fps,
+                 doc.parse_labels().unwrap(),
+                 doc.parse_waveblocks().unwrap(),
+                 doc.parse_sequences().unwrap())
             }
             Err(err) => panic!("Error decoding project document: {}", err)
         };
 
-        Self { path: path.to_string(), fps: fps, labels: labels, waveblocks: wb, con: con }
+        Self {
+            path: path.to_string(),
+            fps: fps,
+            labels: labels,
+            waveblocks: wb,
+            sequences: seq,
+            con: con }
+    }
+
+    fn block_id_from_index(&self, idx: u16) -> i64 {
+        match &self.waveblocks {
+            Some(wb) => wb[idx as usize ].blockid as i64,
+            None => panic!("No such block")
+        }
     }
 }
 

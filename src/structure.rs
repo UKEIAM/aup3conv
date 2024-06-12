@@ -55,12 +55,46 @@ use crate::tagstack::Tag;
 //     envelope: Envelope,
 // }
 // 
-// pub struct Sequence {
-//     maxsamples: u64,
-//     sampleformat: u64,
-//     numsamples: u64,
-//     blocks: Vec<WaveBlock>,
-// }
+#[derive(Debug, Clone)]
+#[pyclass]
+pub struct Sequence {
+    maxsamples: u64,
+    sampleformat: u64,
+    numsamples: u64,
+    blocks: Option<Vec<WaveBlock>>
+}
+
+impl Sequence {
+    pub fn from_tag(tag: &Tag) -> io::Result<Self> {
+        let maxsamples = tag.attributes.get("maxsamples")
+            .expect("Key 'start' not in tag attributes")
+            .parse::<u64>().unwrap();
+
+        let sampleformat = tag.attributes.get("sampleformat")
+            .expect("Key 'start' not in tag attributes")
+            .parse::<u64>().unwrap();
+
+        let numsamples = tag.attributes.get("numsamples")
+            .expect("Key 'start' not in tag attributes")
+            .parse::<u64>().unwrap();
+
+        Ok(Self { maxsamples: maxsamples, sampleformat: sampleformat,
+            numsamples: numsamples, blocks: None })
+    }
+}
+
+#[pymethods]
+impl Sequence {
+    fn __str__(&self) -> String {
+        format!("Sequence(maxsamples={}, sampleformat={}, numsamples={})",
+        self.maxsamples, self.sampleformat, self.numsamples)
+    }
+
+    fn __repr__(&self) -> String {
+        self.__str__()
+    }
+}
+
 #[derive(Debug,Clone)]
 #[pyclass]
 pub struct WaveBlock {
@@ -68,7 +102,7 @@ pub struct WaveBlock {
     pub start: usize,
 
     #[pyo3(get, name="block_id")]
-    pub blockid: u64,
+    pub blockid: u16,
 }
 
 impl WaveBlock {
@@ -78,7 +112,7 @@ impl WaveBlock {
             .parse::<usize>().unwrap();
         let bid = tag.attributes.get("blockid")
             .expect("Key 'blockid' not in tag attributes")
-            .parse::<u64>().unwrap();
+            .parse::<u16>().unwrap();
         Ok(Self { start: start, blockid: bid })
 
     }
