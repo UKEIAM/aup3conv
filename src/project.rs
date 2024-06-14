@@ -91,8 +91,14 @@ impl Project {
         self.__str__()
     }
 
+    fn load_audio(&self) -> PyResult<Vec<f32>> {
+        let mut samples = Vec::<f32>::new();
+        if let Err(_) = AudioLoader::load_audio(self, &mut samples) {
+            return Err(PyIOError::new_err("Could not read audio"));
         }
+        Ok(samples)
     }
+
 
     fn load_slice_from_label(&self, label: &Label) -> PyResult<Vec<f32>> {
         let mut out = Vec::<f32>::new();
