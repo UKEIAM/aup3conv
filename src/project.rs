@@ -91,18 +91,6 @@ impl Project {
         self.__str__()
     }
 
-    fn load_waveblock(&self, block_id: i64) -> PyResult<Vec<f32>> {
-        let mut blob = self.con.blob_open(DatabaseName::Main, "sampleblocks",
-            "samples", block_id, true)
-            .expect("Cannot read blob");
-
-        let mut buff = vec![0u8; 1048576];
-        blob.read(&mut buff).expect("cannot read blob");
-
-        let mut out = Vec::<f32>::new();
-        match bytes_to_audio(&mut buff, &mut out) {
-            Err(_) => Err(PyValueError::new_err("Could not align bytes to float.")),
-                _ => Ok(out)
         }
     }
 
