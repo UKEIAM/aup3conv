@@ -58,10 +58,10 @@ use crate::tagstack::Tag;
 #[derive(Debug, Clone)]
 #[pyclass]
 pub struct Sequence {
-    maxsamples: u64,
-    sampleformat: u64,
-    numsamples: u64,
-    blocks: Option<Vec<WaveBlock>>
+    pub maxsamples: u64,
+    pub sampleformat: u64,
+    pub numsamples: u64,
+    pub blocks: Option<Vec<WaveBlock>>
 }
 
 impl Sequence {
