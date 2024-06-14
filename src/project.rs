@@ -203,6 +203,23 @@ impl AudioLoader for Project {
             Ordering::Greater => Err(())
         }
     }
+
+    fn load_wave_block(&self, block_id: u16) -> Result<Vec::<u8>, AudioError> {
+        let mut blob = self.con.blob_open(DatabaseName::Main, "sampleblocks",
+            "samples", block_id as i64, true)
+            .expect("Cannot read blob");
+        let mut buffer = Vec::<u8>::with_capacity(blob.len());
+
+        match blob.read_to_end(&mut buffer) {
+            Ok(count) => {
+                if count != blob.len() {
+                    return Err(AudioError::ReadFailed);
+                }
+                Ok(buffer)
+            },
+            Err(e) => Err(AudioError::ReadFailed)
+        }
+    }
 }
 
 pub fn bytes_to_audio(buffer: &[u8], out: &mut Vec<f32>) ->  Result<(), ()> {
