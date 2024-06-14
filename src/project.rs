@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 
 use rusqlite::{DatabaseName,Connection,OpenFlags};
 use pyo3::prelude::*;
-use pyo3::exceptions::{PyValueError, PyIOError};
+use pyo3::exceptions::PyIOError;
 
 use crate::audacity::projectdoc::ProjectDoc;
 use crate::audacity::tagdict::TagDict;
@@ -143,7 +143,7 @@ impl AudioLoader for Project {
                 }
                 Ok(buffer)
             },
-            Err(e) => Err(AudioError::ReadFailed)
+            Err(_) => Err(AudioError::ReadFailed)
         }
     }
 }
