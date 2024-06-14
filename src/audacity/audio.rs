@@ -1,5 +1,3 @@
-use rusqlite::{Connection, DatabaseName,Result};
-use std::io::Read;
 use crate::structure::WaveBlock;
 
 
@@ -9,28 +7,6 @@ pub enum AudioError {
     ReadFailed,
 }
 
-
-#[derive(Debug)]
-pub struct FakeBlock {
-    blockid: usize,
-    sampleformat: i64,
-    pub summin: f64,
-    summax: f64,
-    pub sumrms: f64,
-}
-
-
-#[derive(Debug)]
-pub struct SampleBlock {
-    pub blockid: usize,
-    sampleformat: i64,
-    pub summin: f64,
-    summax: f64,
-    pub sumrms: f64,
-    pub summary256: [u8; 12288],
-    summary64k: [u8; 48],
-    pub samples: [u8; 1048576],
-}
 
 pub trait AudioProcessor {
     fn fps(&self) -> u32;
@@ -42,45 +18,4 @@ pub trait AudioLoader: AudioProcessor {
     fn load_audio(&self, buffer: &mut Vec<f32>) -> Result<(), AudioError>;
 
     fn load_wave_block(&self, block_id: u16) -> Result<Vec::<u8>, AudioError>;
-
-    fn load_sampleblock(&self, con: &Connection, block_id: usize) -> Result<SampleBlock> {
-
-        let q = "SELECT blockid, sampleformat, summin, summax, sumrms
-                 FROM sampleblocks WHERE blockid = ?";
-
-        let mut stmt = con.prepare(&q)?;
-        let fb = stmt.query_row([block_id], |row| Ok(FakeBlock {
-                blockid: row.get(0)?,
-                sampleformat: row.get(1)?,
-                summin: row.get(2)?,
-                summax: row.get(3)?,
-                sumrms: row.get(4)?,
-            }))?;
-
-        let mut out = SampleBlock {
-            blockid: fb.blockid,
-            sampleformat: fb.sampleformat,
-            summin: fb.summin,
-            summax: fb.summax,
-            sumrms: fb.sumrms,
-            summary256: [0u8; 12288],
-            summary64k: [0u8; 48],
-            samples: [0u8; 1048576]
-        };
-
-
-        let mut s256 = con.blob_open(
-            DatabaseName::Main, "sampleblocks", "summary256", block_id as i64, true)?;
-        s256.read(&mut out.summary256).expect("read error");
-
-        let mut s64k = con.blob_open(
-            DatabaseName::Main, "sampleblocks", "summary64k", block_id as i64, true)?;
-        s64k.read(&mut out.summary64k).expect("read error");
-
-        let mut samples = con.blob_open(
-            DatabaseName::Main, "sampleblocks", "samples", block_id as i64, true)?;
-        samples.read(&mut out.samples).expect("read error");
-
-        Ok(out)
-    }
 }
