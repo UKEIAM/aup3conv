@@ -44,15 +44,6 @@ impl TagStack {
         self.level.push(self.current_level);
     }
 
-    pub fn view(&self) {
-        for (tag, level) in self.stack.iter().zip(self.level.iter()) {
-            for _ in 1..*level {
-                print!("  ");
-            }
-            println!("{:?} -- {:?}", tag.name, tag.attributes);
-        }
-    }
-
     pub fn increase_level(&mut self) {
         self.current_level += 1;
     }
