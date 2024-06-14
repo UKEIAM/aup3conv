@@ -9,12 +9,12 @@ pub fn time_to_byte(time: f64, fps: u32) -> usize {
 
 pub fn block_index(pos: usize, block_size: usize) -> u16 {
     let n = pos as f64 / block_size as f64;
-    n.floor() as u16 + 1
+    n.floor() as u16
 }
 
 
 pub fn rel_block_offset(pos: usize, block_idx: u16, block_size: usize) -> usize {
-    let clean_idx = block_idx as usize - 1;
+    let clean_idx = block_idx as usize;
     pos - (clean_idx * block_size)
 }
 
@@ -45,8 +45,8 @@ mod tests {
 
     #[test]
     fn test_block_index() {
-        assert_eq!(block_index(44099, 44100), 1);
-        assert_eq!(block_index(44100, 44100), 2);
-        assert_eq!(block_index(44101, 44100), 2);
+        assert_eq!(block_index(44099, 44100), 0);
+        assert_eq!(block_index(44100, 44100), 1);
+        assert_eq!(block_index(44101, 44100), 1);
     }
 }
