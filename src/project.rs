@@ -69,13 +69,6 @@ impl Project {
             sequences: seq,
             con: con }
     }
-
-    fn block_id_from_index(&self, idx: u16) -> i64 {
-        match &self.waveblocks {
-            Some(wb) => wb[idx as usize ].blockid as i64,
-            None => panic!("No such block")
-        }
-    }
 }
 
 
