@@ -3,12 +3,12 @@ use std::cmp::Ordering;
 
 use rusqlite::{DatabaseName,Connection,OpenFlags};
 use pyo3::prelude::*;
-use pyo3::exceptions::PyValueError;
+use pyo3::exceptions::{PyValueError, PyIOError};
 
 use crate::audacity::projectdoc::ProjectDoc;
 use crate::audacity::tagdict::TagDict;
 use crate::structure::*;
-use crate::audacity::audio::{AudioLoader, AudioProcessor, MAX_SAMPLE_BLOCK_SIZE};
+use crate::audacity::audio::{AudioLoader, AudioProcessor, MAX_SAMPLE_BLOCK_SIZE, AudioError};
 use crate::utils;
 
 
@@ -116,6 +116,25 @@ impl AudioProcessor for Project {
 
 
 impl AudioLoader for Project {
+    fn load_audio(&self, buffer: &mut Vec<f32>) -> Result<(), AudioError> {
+        let mut raw_buffer = Vec::<u8>::new();
+
+        match &self.waveblocks {
+            Some(blocks) => {
+                for blk in blocks.iter() {
+                    match self.read_waveblock(blk.blockid) {
+                        Ok(bytes) => { raw_buffer.extend(bytes.iter()); },
+                        Err(_) => { return Err(AudioError::NoWaveblocks); }
+                    };
+                }
+                bytes_to_audio(&raw_buffer, buffer).unwrap();
+                Ok(())
+            },
+            None => Err(AudioError::NoWaveblocks)
+        }
+    }
+
+
     fn load_audio_slice(&self, t0: f64, t1: f64, out: &mut Vec<f32>) -> Result<(), ()> {
 
         let start = utils::time_to_byte(t0, self.fps);

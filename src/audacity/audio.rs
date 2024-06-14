@@ -4,6 +4,13 @@ use crate::structure::WaveBlock;
 
 pub const MAX_SAMPLE_BLOCK_SIZE: usize = 1048576;
 
+
+#[derive(Debug)]
+pub enum AudioError {
+    NoWaveblocks,
+}
+
+
 #[derive(Debug)]
 pub struct FakeBlock {
     blockid: usize,
@@ -32,6 +39,9 @@ pub trait AudioProcessor {
 }
 
 pub trait AudioLoader: AudioProcessor {
+
+    fn load_audio(&self, buffer: &mut Vec<f32>) -> Result<(), AudioError>;
+
     fn load_audio_slice(&self, start: f64, stop: f64, buffer: &mut Vec<f32>) -> Result<(), ()>;
 
     fn load_sampleblock(&self, con: &Connection, block_id: usize) -> Result<SampleBlock> {
