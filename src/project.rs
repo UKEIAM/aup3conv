@@ -128,7 +128,7 @@ impl AudioLoader for Project {
         match &self.waveblocks {
             Some(blocks) => {
                 for blk in blocks.iter() {
-                    match self.read_waveblock(blk.blockid) {
+                    match AudioLoader::load_wave_block(self, blk.blockid) {
                         Ok(bytes) => { raw_buffer.extend(bytes.iter()); },
                         Err(_) => { return Err(AudioError::NoWaveblocks); }
                     };
