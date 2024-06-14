@@ -1,4 +1,4 @@
-use std::io::{Seek, Read, SeekFrom};
+use std::io::Read;
 use std::cmp::Ordering;
 
 use rusqlite::{DatabaseName,Connection,OpenFlags};
@@ -8,9 +8,7 @@ use pyo3::exceptions::{PyValueError, PyIOError};
 use crate::audacity::projectdoc::ProjectDoc;
 use crate::audacity::tagdict::TagDict;
 use crate::structure::*;
-use crate::audacity::audio::{AudioLoader, AudioProcessor, MAX_SAMPLE_BLOCK_SIZE, AudioError};
-use crate::utils;
-
+use crate::audacity::audio::{AudioLoader, AudioProcessor, AudioError};
 
 
 #[pyclass]

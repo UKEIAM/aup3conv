@@ -2,8 +2,6 @@ use rusqlite::{Connection, DatabaseName,Result};
 use std::io::Read;
 use crate::structure::WaveBlock;
 
-pub const MAX_SAMPLE_BLOCK_SIZE: usize = 1048576;
-
 
 #[derive(Debug)]
 pub enum AudioError {
