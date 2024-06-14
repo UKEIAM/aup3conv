@@ -96,15 +96,6 @@ impl Project {
         }
         Ok(samples)
     }
-
-
-    fn load_slice_from_label(&self, label: &Label) -> PyResult<Vec<f32>> {
-        let mut out = Vec::<f32>::new();
-        match self.load_audio_slice(label.t, label.t1, &mut out) {
-            Err(_) => Err(PyValueError::new_err("Could not do it")),
-            _ => Ok(out)
-        }
-    }
 }
 
 
@@ -174,16 +165,4 @@ pub fn bytes_to_audio(buffer: &[u8], out: &mut Vec<f32>) ->  Result<(), ()> {
 mod tests {
     use super::*;
 
-    #[test]
-    fn audioloader_project_load_audio_slice() {
-        let pro = Project::open("data/test-project.aup3");
-        let mut out = Vec::<f32>::new();
-
-        match pro.labels {
-            Some(ref labels) => {
-                pro.load_audio_slice(labels[3].t, labels[3].t1, &mut out).expect("Aerg");
-            },
-            _ => ()
-        }
-    }
 }
