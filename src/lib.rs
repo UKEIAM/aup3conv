@@ -23,7 +23,7 @@ fn get_labels(path: String) -> PyResult<Option<Vec<Label>>> {
 }
 
 #[pymodule]
-fn aup3conv(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn _aup3conv(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_labels, m)?)?;
     m.add_function(wrap_pyfunction!(open, m)?)?;
     Ok(())
