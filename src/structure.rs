@@ -27,7 +27,7 @@ use crate::tagstack::Tag;
 //     WaveTrack(WaveTrack),
 //     LabelTrack(LabelTrack),
 // }
-// 
+//
 // pub struct WaveTrack {
 //     name: String,
 //     isSelected: bool,
@@ -44,17 +44,44 @@ use crate::tagstack::Tag;
 //     sampleformat: i64,
 //     clips: Vec<WaveClip>,
 // }
-// 
-// pub struct WaveClip {
-//     offset: f64,
-//     trimLeft: f64,
-//     trimRight: f64,
-//     name: String,
-//     colorindex: i32,
-//     sequences: Sequence,
-//     envelope: Envelope,
-// }
-// 
+//
+#[derive(Debug, Clone)]
+#[pyclass]
+pub struct WaveClip {
+    offset: f64,
+    trim_left: Option<f64>,
+    trim_right: Option<f64>,
+    name: Option<String>,
+    colorindex: Option<i32>,
+    sequences: Option<Vec<Sequence>>,
+    //envelope: Option<Envelope>,
+}
+
+impl WaveClip {
+    pub fn from_tag(tag: &Tag) -> io::Result<Self> {
+        let offset = tag.attributes.get("offset")
+            .expect("Key 'offset' not in tag attributes")
+            .parse::<f64>().unwrap();
+
+        Ok(Self { offset: offset, trim_left: None, trim_right: None,
+            name: None, colorindex: None, sequences: None })
+    }
+}
+
+#[pymethods]
+impl WaveClip {
+    fn __str__(&self) -> String {
+        format!("WaveClip(offset={}, trim_left={:?}, trim_right={:?},
+            name={:?}, colorindex={:?}, sequences={:?})",
+        self.offset, self.trim_left, self.trim_right, self.name, self.colorindex,
+        self.sequences)
+    }
+
+    fn __repr__(&self) -> String {
+        self.__str__()
+    }
+}
+
 #[derive(Debug, Clone)]
 #[pyclass]
 pub struct Sequence {
@@ -128,11 +155,11 @@ impl WaveBlock{
         self.__str__()
     }
 }
-// 
+//
 // pub struct Envelope {
 //     numpoints: u64,
 // }
-// 
+//
 // pub struct LabelTrack {
 //     name: String,
 //     isSelected: bool,

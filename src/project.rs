@@ -29,6 +29,9 @@ pub struct Project {
     #[pyo3(get)]
     sequences: Option<Vec<Sequence>>,
 
+    #[pyo3(get)]
+    waveclips: Option<Vec<WaveClip>>,
+
     con: Connection
 }
 
@@ -45,7 +48,7 @@ impl Project {
         tagdict.decode(&con);
 
         let mut doc = ProjectDoc::new(tagdict);
-        let (fps, labels, wb, seq) = match doc.decode(&con) {
+        let (fps, labels, wb, seq, clips) = match doc.decode(&con) {
             Ok(()) => {
 
                 let fps = match doc.parse_sample_rate() {
@@ -56,7 +59,8 @@ impl Project {
                 (fps,
                  doc.parse_labels().unwrap(),
                  doc.parse_waveblocks().unwrap(),
-                 doc.parse_sequences().unwrap())
+                 doc.parse_sequences().unwrap(),
+                 doc.parse_waveclips().unwrap(),)
             }
             Err(err) => panic!("Error decoding project document: {}", err)
         };
@@ -67,6 +71,7 @@ impl Project {
             labels: labels,
             waveblocks: wb,
             sequences: seq,
+            waveclips: clips,
             con: con }
     }
 }

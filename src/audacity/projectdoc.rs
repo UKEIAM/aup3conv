@@ -244,6 +244,17 @@ impl ProjectDoc {
         Ok(Some(out))
     }
 
+    pub fn parse_waveclips(&mut self) -> Result<Option<Vec<WaveClip>>> {
+        let mut out = Vec::<WaveClip>::new();
+        for tag in self.tags.stack.iter() {
+            if tag.name == "waveclip" { out.push(WaveClip::from_tag(&tag)?) };
+        }
+        if out.is_empty() {
+            return Ok(None)
+        }
+        Ok(Some(out))
+    }
+
     fn get_tag_by_name(&mut self, name: &str) -> Option<&Tag> {
         for tag in self.tags.stack.iter() {
             if tag.name == *name {
