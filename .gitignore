@@ -1,4 +1,5 @@
 *.raw
+*.so
 .python-version
 .vimrc
 /data
