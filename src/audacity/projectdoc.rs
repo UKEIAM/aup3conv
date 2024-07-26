@@ -247,11 +247,33 @@ impl ProjectDoc {
     pub fn parse_waveclips(&mut self) -> Result<Option<Vec<WaveClip>>> {
         let mut out = Vec::<WaveClip>::new();
         for tag in self.tags.stack.iter() {
-            if tag.name == "waveclip" { out.push(WaveClip::from_tag(&tag)?) };
+            if tag.name == "waveclip" {
+                out.push(WaveClip::from_tag(&tag)?)
+            }
+            else if tag.name == "sequence" {
+                match out.last_mut() {
+                    Some(clip) => { clip.sequences = Some(Sequence::from_tag(&tag)?) },
+                    None => panic!("No waveclip to append to")
+                }
+            }
+            else if tag.name == "waveblock" {
+                match out.last_mut() {
+                    Some(clip) => {
+                        if let Some(mut seq) = clip.sequences.take() {
+                            seq.blocks.push(WaveBlock::from_tag(&tag)?);
+                            let _ = clip.sequences.insert(seq);
+                        }
+                    },
+                    None => panic!("No waveclip to append to")
+                }
+
+            };
         }
         if out.is_empty() {
             return Ok(None)
         }
+
+        out.sort_by(|x, y| x.offset.partial_cmp(&y.offset).unwrap());
         Ok(Some(out))
     }
 

@@ -48,12 +48,14 @@ use crate::tagstack::Tag;
 #[derive(Debug, Clone)]
 #[pyclass]
 pub struct WaveClip {
-    offset: f64,
+    #[pyo3(get)]
+    pub offset: f64,
     trim_left: Option<f64>,
     trim_right: Option<f64>,
     name: Option<String>,
     colorindex: Option<i32>,
-    sequences: Option<Vec<Sequence>>,
+    #[pyo3(get)]
+    pub sequences: Option<Sequence>
     //envelope: Option<Envelope>,
 }
 
@@ -88,7 +90,9 @@ pub struct Sequence {
     pub maxsamples: u64,
     pub sampleformat: u64,
     pub numsamples: u64,
-    pub blocks: Option<Vec<WaveBlock>>
+
+    #[pyo3(get)]
+    pub blocks: Vec<WaveBlock>
 }
 
 impl Sequence {
@@ -106,8 +110,12 @@ impl Sequence {
             .parse::<u64>().unwrap();
 
         Ok(Self { maxsamples: maxsamples, sampleformat: sampleformat,
-            numsamples: numsamples, blocks: None })
+            numsamples: numsamples, blocks: Vec::<WaveBlock>::new() })
     }
+
+    //pub fn new() -> Self {
+    //    Self { maxsamples: 0, sampleformat: 0, numsamples: 0, blocks: Vec::<WaveBlock>::new() }
+    //}
 }
 
 #[pymethods]
