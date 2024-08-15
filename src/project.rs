@@ -291,12 +291,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_open() {
-        let p = Project::open("/home/michael/Downloads/id-35.aup3");
-        if let Some(labels) = p.labels {
-            for item in labels {
-                let a = block_index_from_label(p.waveclips.as_ref().expect("no waveclip"), &item);
-                println!("{:?}", a);
+    fn test_load_slice() {
+        let p = Project::open("/data/mascan/sessions/129.aup3");
+        if let Some(ref labels) = p.labels {
+            let mut samples = Vec::<f32>::new();
+            let n = 21;
+            if let Ok(_) = p.load_slice(labels[n].t, labels[n].t1, &mut samples) {
+                println!("{} samples read.", samples.len());
             }
         }
     }
