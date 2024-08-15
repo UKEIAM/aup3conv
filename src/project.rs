@@ -7,6 +7,7 @@ use pyo3::exceptions::PyIOError;
 
 use crate::audacity::projectdoc::ProjectDoc;
 use crate::audacity::tagdict::TagDict;
+use crate::io::*;
 use crate::structure::*;
 use crate::audacity::audio::{AudioLoader, AudioProcessor, AudioError};
 use crate::utils::*;
@@ -264,20 +265,6 @@ pub fn bytes_to_audio(buffer: &[u8], out: &mut Vec<f32>) ->  Result<(), ()> {
     out.resize(samples.len(), 0f32);
     out.copy_from_slice(samples);
     Ok(())
-}
-
-
-struct Position {
-    clip_index: usize,
-    block_index: usize,
-    block_id: u16,
-    offset: usize
-}
-
-struct ReadPosition {
-    block_id: u16,
-    start: usize,
-    stop: usize
 }
 
 
