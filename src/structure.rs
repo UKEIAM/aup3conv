@@ -68,6 +68,14 @@ impl WaveClip {
         Ok(Self { offset: offset, trim_left: None, trim_right: None,
             name: None, colorindex: None, sequences: None })
     }
+
+    pub fn is_empty(&self) -> bool {
+        if let Some(seq) = &self.sequences {
+            if seq.numsamples > 0 { false } else { true }
+        } else {
+            false
+        }
+    }
 }
 
 #[pymethods]
