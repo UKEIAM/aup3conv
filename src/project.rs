@@ -138,38 +138,37 @@ impl Project {
 
         let start_pos = self.pos_from_time(start);
         let stop_pos = self.pos_from_time(stop);
-
         if start_pos.clip_index == stop_pos.clip_index {
             if start_pos.block_index == stop_pos.block_index {
-                let rp = ReadPosition { block_id: start_pos.block_id, start: start_pos.offset, stop: stop_pos.offset };
+                let rp = ReadPosition::new(start_pos.block_id, start_pos.offset, Some(stop_pos.offset));
                 out.push(rp);
             } else {
-                let diff = stop_pos.block_id - start_pos.block_id;
+                let diff = stop_pos.block_index - start_pos.block_index;
                 if diff == 1 {
-                    let rp0 = ReadPosition { block_id: start_pos.block_id, start: start_pos.offset, stop: stop_pos.offset };
-                    let rpN = ReadPosition { block_id: stop_pos.block_id, start: 0, stop: stop_pos.offset };
-                    out.push(rp0);
-                    out.push(rpN);
+                    let rp_0 = ReadPosition::new(start_pos.block_id, start_pos.offset, None);
+                    let offset = if stop_pos.offtrack { None } else { Some(stop_pos.offset) };
+                    let rp_n = ReadPosition::new(stop_pos.block_id, 0, offset);
+                    out.push(rp_0);
+                    out.push(rp_n);
                 } else {
-                    let rp0 = ReadPosition { block_id: start_pos.block_id, start: start_pos.offset, stop: stop_pos.offset };
-                    out.push(rp0);
+                    let rp_0 = ReadPosition::new(start_pos.block_id, start_pos.offset, None);
+                    out.push(rp_0);
 
                     for _ in start_pos.block_index+1..stop_pos.block_index {
-                        let rpx = ReadPosition { block_id: start_pos.block_id, start: 0, stop: 262144 };
+                        let rpx = ReadPosition::new(start_pos.block_id, 0, None);
                         out.push(rpx);
                     }
-                    let rpN = ReadPosition { block_id: stop_pos.block_id, start: 0, stop: stop_pos.offset };
-                    out.push(rpN);
+                    let rp_n = ReadPosition::new(stop_pos.block_id, 0, Some(stop_pos.offset));
+                    out.push(rp_n);
                 }
             }
 
-        } else { 
-
+        // desired slice stretches over multiple clips
+        } else {
+            panic!("Slice streches over multiple clips. Not implemented!");
         }
         out
     }
-
-
 }
 
 
