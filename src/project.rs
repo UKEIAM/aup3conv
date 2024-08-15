@@ -1,4 +1,4 @@
-use std::io::Read;
+use std::io::{Read,Seek,SeekFrom};
 use std::cmp::Ordering;
 
 use rusqlite::{DatabaseName,Connection,OpenFlags};
@@ -208,34 +208,48 @@ impl AudioLoader for Project {
     fn load_slice(&self, start: f64, stop: f64, out: &mut Vec<f32>) -> Result<(), AudioError> {
 
         let mut buffer = Vec::<u8>::new();
-        match &self.waveblocks {
-            Some(blocks) => {},
-            None => {}
+        let items = self.block_range(start, stop);
+
+        for item in items {
+            match AudioLoader::load_block_slice(self, &item, &mut buffer) {
+                Ok(()) => {},
+                Err(err) => {
+                    panic!("ERROR: Could not read block, because {:?}.", err);
+                }
+            }
         }
-        Err(AudioError::NoWaveblocks)
+
+        bytes_to_audio(&buffer, out).unwrap();
+        Ok(())
     }
 
-    // start and stop in SAMPLES !!
-    fn load_block_slice(&self, block: &WaveBlock, start: u64, stop: u64, out: &mut Vec<f32>) -> Result<(), AudioError> {
-        if stop < start {
-            panic!("Stop position before start position");
-        }
+    // Read chunk from waveblock.
+    //
+    // Chunk size is determined by `item`.
+    fn load_block_slice(&self, item: &ReadPosition, out: &mut Vec<u8>) -> Result<(), AudioError> {
 
         let mut blob = self.con.blob_open(DatabaseName::Main, "sampleblocks",
-            "samples", block.blockid as i64, true)
+            "samples", item.block_id as i64, true)
             .expect("Cannot read blob");
 
-        let n_bytes: usize = (stop - start) as usize * 4;
-        let mut buffer = Vec::<u8>::with_capacity(n_bytes);
 
-        match blob.read_exact(&mut buffer) {
-            Ok(()) => { 
-                bytes_to_audio(&buffer, out).unwrap();
-                Ok(()) 
-            },
-            Err(_) => Err(AudioError::ReadFailed)
+        let mut buffer = Vec::<u8>::with_capacity(blob.size() as usize);
+        if let Ok(_) = blob.seek(SeekFrom::Start(item.start as u64)) {
+            if let Some(chunk_size) = item.size() {
+                buffer.resize(chunk_size, 0u8);
+                if let Err(_) = blob.read_exact(&mut buffer) {
+                    return Err(AudioError::ReadFailed)
+                }
+            } else {
+                if let Err(_) = blob.read_to_end(&mut buffer) {
+                    return Err(AudioError::ReadFailed)
+                }
+            }
+            out.append(&mut buffer);
+            Ok(())
+        } else {
+            Err(AudioError::SeekFailed)
         }
-
     }
 
     fn load_wave_block(&self, block_id: u16) -> Result<Vec::<u8>, AudioError> {
