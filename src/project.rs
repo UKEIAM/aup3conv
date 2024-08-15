@@ -182,21 +182,16 @@ impl Project {
         self.__str__()
     }
 
-    fn load_audio(&self) -> PyResult<Vec<f32>> {
+    fn load_audio(&self, start: f64, stop: f64) -> PyResult<Vec<f32>> {
         let mut samples = Vec::<f32>::new();
-        if let Err(_) = AudioLoader::load_audio(self, &mut samples) {
+        if let Err(_) = AudioLoader::load_slice(self, start, stop, &mut samples) {
             return Err(PyIOError::new_err("Could not read audio"));
         }
         Ok(samples)
     }
 
     fn load_label(&self, label: &Label) -> PyResult<Vec<f32>> {
-        let mut samples = Vec::<f32>::new();
-
-        if let Err(_) = AudioLoader::load_slice(self, label.t, label.t1, &mut samples) {
-            return Err(PyIOError::new_err("Could not load audio"));
-        }
-        Ok(samples)
+        Ok(self.load_audio(label.t, label.t1).unwrap())
     }
 }
 
