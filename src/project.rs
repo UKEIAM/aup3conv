@@ -95,7 +95,11 @@ impl Project {
         index
     }
 
-    // returns (clip_idx, block_idx, block_id, byte_offset)
+
+    // Convert a time to a Position.
+    //
+    // The positive floating point value `time` is converted to the
+    // exact position in the data structure, packed into an Position object.
     fn pos_from_time(&self, pos: f64) -> Position {
         if pos < 0f64 {
             panic!("POS {} is less than zero", pos);
@@ -104,21 +108,26 @@ impl Project {
         let mut block_index: usize = 0;
         let mut block_id: u16 = 0;
         let mut byte_pos: usize = 0;
+        let mut offtrack: bool = true;
         let clip_idx = self.clip_idx_from_time(pos);
         if let Some(clips) = &self.waveclips {
             if let Some(seq) = &clips[clip_idx].sequences {
+                // position in frames relative to the clip
                 let fpos = time_to_frame(pos-clips[clip_idx].offset, self.fps);
                 for (i, block) in seq.blocks.iter().enumerate().rev() {
                     if fpos >= block.start as u64 {
                         block_index = i;
                         block_id = block.blockid;
-                        byte_pos = (block.start - fpos as usize) * 4;
+                        byte_pos = (fpos as usize - block.start) * 4;
+                        offtrack = if fpos > seq.numsamples {true} else {false};
                         break;
                     }
                 }
             }
         }
-        Position { clip_index: clip_idx, block_index: block_index, block_id: block_id, offset: byte_pos }
+        Position { clip_index: clip_idx, block_index: block_index, block_id: block_id,
+                    offset: byte_pos, offtrack: offtrack }
+
     }
 
     // get the block sequence to be read
