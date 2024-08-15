@@ -1,8 +1,9 @@
-use crate::structure::{WaveBlock,WaveClip,Label};
+use crate::structure::{WaveClip,Label};
 
 pub fn time_to_frame(time: f64, fps: u32) -> u64 {
     (time * fps as f64).round() as u64
 }
+
 
 pub fn time_to_byte(time: f64, fps: u32) -> usize {
     (time_to_frame(time, fps) * 4) as usize
@@ -39,35 +40,6 @@ pub fn clip_index(clips: &Vec<WaveClip>, label: &Label) -> (usize, usize) {
         }
     }
 
-    (start, stop)
-}
-
-fn find_block(pos: u64, blocks: &Vec<WaveBlock>) -> usize {
-    let mut out = 0;
-    for (block, i) in blocks.iter().zip(0..blocks.len()).rev() {
-        if pos >= block.start as u64 {
-            out = i;
-            break;
-        }
-    }
-    out
-}
-
-pub fn block_index_from_label(clips: &Vec<WaveClip>, label: &Label) -> (usize, usize) {
-    let mut start = 0;
-    let mut stop = 0;
-    let start_frame = time_to_frame(label.t, 44100);
-    let stop_frame = time_to_frame(label.t1, 44100);
-
-    let (clip_start_idx, clip_stop_idx) = clip_index(clips, label);
-
-    if let Some(seq) = &clips[clip_start_idx].sequences {
-        start = find_block(start_frame, &seq.blocks);
-    }
-
-    if let Some(seq) = &clips[clip_stop_idx].sequences {
-        stop = find_block(stop_frame, &seq.blocks);
-    }
     (start, stop)
 }
 

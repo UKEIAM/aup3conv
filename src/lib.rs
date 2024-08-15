@@ -2,8 +2,8 @@ use pyo3::prelude::*;
 
 mod tagstack;
 mod structure;
-mod utils;
 mod io;
+pub mod utils;
 pub mod audacity;
 pub mod project;
 
