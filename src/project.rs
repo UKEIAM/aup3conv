@@ -85,6 +85,7 @@ impl Project {
         let mut index: usize = 0;
         if let Some(clips) = &self.waveclips {
             for (i, clip) in clips.iter().enumerate().rev() {
+                if clip.is_empty() { continue }
                 if pos >= clip.offset {
                     index = i;
                     break;
