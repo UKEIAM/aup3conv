@@ -1,5 +1,6 @@
 *.raw
 *.so
+.ipynb_checkpoints
 .python-version
 .vimrc
 /data
