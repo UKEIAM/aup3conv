@@ -6,6 +6,7 @@ use crate::io::ReadPosition;
 pub enum AudioError {
     NoWaveblocks,
     ReadFailed,
+    SeekFailed,
 }
 
 
