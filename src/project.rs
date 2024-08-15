@@ -203,24 +203,6 @@ impl AudioProcessor for Project {
 
 
 impl AudioLoader for Project {
-    fn load_audio(&self, buffer: &mut Vec<f32>) -> Result<(), AudioError> {
-        let mut raw_buffer = Vec::<u8>::new();
-
-        match &self.waveblocks {
-            Some(blocks) => {
-                for blk in blocks.iter() {
-                    match AudioLoader::load_wave_block(self, blk.blockid) {
-                        Ok(bytes) => { raw_buffer.extend(bytes.iter()); },
-                        Err(_) => { return Err(AudioError::NoWaveblocks); }
-                    };
-                }
-                bytes_to_audio(&raw_buffer, buffer).unwrap();
-                Ok(())
-            },
-            None => Err(AudioError::NoWaveblocks)
-        }
-    }
-
     fn load_slice(&self, start: f64, stop: f64, out: &mut Vec<f32>) -> Result<(), AudioError> {
 
         let mut buffer = Vec::<u8>::new();
