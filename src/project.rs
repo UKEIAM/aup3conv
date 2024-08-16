@@ -1,6 +1,7 @@
 use std::io::{Read,Seek,SeekFrom};
 use std::cmp::Ordering;
 
+use rusqlite;
 use rusqlite::{DatabaseName,Connection,OpenFlags};
 use pyo3::prelude::*;
 use pyo3::exceptions::PyIOError;
@@ -39,12 +40,10 @@ pub struct Project {
 
 
 impl Project {
-    pub fn open(path: &str) -> Self {
-        let msg = format!("Failed to open path \"{}\"", path);
+    pub fn open(path: &str) -> Result<Self, rusqlite::Error> {
         let con = Connection::open_with_flags(
             path,
-            OpenFlags::SQLITE_OPEN_READ_ONLY)
-            .expect(&msg);
+            OpenFlags::SQLITE_OPEN_READ_ONLY)?;
 
         let mut tagdict = TagDict::new();
         tagdict.decode(&con);
@@ -67,14 +66,14 @@ impl Project {
             Err(err) => panic!("Error decoding project document: {}", err)
         };
 
-        Self {
+        Ok(Self {
             path: path.to_string(),
             fps: fps,
             labels: labels,
             waveblocks: wb,
             sequences: seq,
             waveclips: clips,
-            con: con }
+            con: con })
     }
 
     fn clip_idx_from_time(&self, pos: f64) -> usize {
@@ -292,7 +291,7 @@ mod tests {
 
     #[test]
     fn test_load_slice() {
-        let p = Project::open("/data/mascan/sessions/129.aup3");
+        let p = Project::open("/data/mascan/sessions/129.aup3").unwrap();
         if let Some(ref labels) = p.labels {
             let mut samples = Vec::<f32>::new();
             let n = 21;
