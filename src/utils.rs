@@ -9,13 +9,6 @@ pub fn time_to_byte(time: f64, fps: u32) -> usize {
 }
 
 
-
-pub fn rel_block_offset(pos: usize, block_idx: u16, block_size: usize) -> usize {
-    let clean_idx = block_idx as usize;
-    pos - (clean_idx * block_size)
-}
-
-
 #[cfg(test)]
 mod tests {
     use super::*;
