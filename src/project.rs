@@ -49,7 +49,7 @@ impl Project {
         tagdict.decode(&con);
 
         let mut doc = ProjectDoc::new(tagdict);
-        let (fps, labels, wb, seq, clips) = match doc.decode(&con) {
+        match doc.decode(&con) {
             Ok(()) => {
 
                 let fps = match doc.parse_sample_rate() {
@@ -57,23 +57,17 @@ impl Project {
                     None => panic!("Parsing failed")
                 };
 
-                (fps,
-                 doc.parse_labels().unwrap(),
-                 doc.parse_waveblocks().unwrap(),
-                 doc.parse_sequences().unwrap(),
-                 doc.parse_waveclips().unwrap(),)
-            }
+                Ok(Self {
+                    path: path.to_string(),
+                    fps: fps,
+                    labels: doc.parse_labels().unwrap(),
+                    waveblocks: doc.parse_waveblocks().unwrap(),
+                    sequences: doc.parse_sequences().unwrap(),
+                    waveclips: doc.parse_waveclips().unwrap(),
+                    con: con })
+            },
             Err(err) => panic!("Error decoding project document: {}", err)
-        };
-
-        Ok(Self {
-            path: path.to_string(),
-            fps: fps,
-            labels: labels,
-            waveblocks: wb,
-            sequences: seq,
-            waveclips: clips,
-            con: con })
+        }
     }
 
     fn clip_idx_from_time(&self, pos: f64) -> usize {
