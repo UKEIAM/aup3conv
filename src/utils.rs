@@ -1,4 +1,3 @@
-use crate::structure::{WaveClip,Label};
 
 pub fn time_to_frame(time: f64, fps: u32) -> u64 {
     (time * fps as f64).round() as u64
@@ -14,28 +13,6 @@ pub fn time_to_byte(time: f64, fps: u32) -> usize {
 pub fn rel_block_offset(pos: usize, block_idx: u16, block_size: usize) -> usize {
     let clean_idx = block_idx as usize;
     pos - (clean_idx * block_size)
-}
-
-
-pub fn clip_index(clips: &Vec<WaveClip>, label: &Label) -> (usize, usize) {
-    let mut start = 0;
-    let mut stop = 0;
-
-    for (clip, i) in clips.iter().zip(0..clips.len()).rev() {
-        if label.t >= clip.offset {
-            start = i;
-            break;
-        }
-    }
-
-    for (clip, i) in clips.iter().zip(0..clips.len()).rev() {
-        if label.t1 >= clip.offset {
-            stop = i;
-            break;
-        }
-    }
-
-    (start, stop)
 }
 
 
