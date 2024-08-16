@@ -1,9 +1,19 @@
+//! Common utilities.
 
+/// Convert time to frame index.
+///
+/// Convert a `time` measured in seconds to the corresponding
+/// audio frame index given the samplerate `fps`.
 pub fn time_to_frame(time: f64, fps: u32) -> u64 {
     (time * fps as f64).round() as u64
 }
 
 
+/// Convert time to byte index.
+///
+/// Convert a `time` measured in seconds to the index of the first byte
+/// of the corresponding audio frame. This function assumes the given audio
+/// data is a single channel 32 bit stream.
 pub fn time_to_byte(time: f64, fps: u32) -> usize {
     (time_to_frame(time, fps) * 4) as usize
 }
