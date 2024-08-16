@@ -1,4 +1,4 @@
-from ._aup3conv import open, get_labels
+from ._aup3conv import open
 
 
-__all__ = ["open", "get_labels"]
+__all__ = ["open"]
