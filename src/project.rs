@@ -43,7 +43,8 @@ impl Project {
     pub fn open(path: &str) -> Result<Self, rusqlite::Error> {
         let con = Connection::open_with_flags(
             path,
-            OpenFlags::SQLITE_OPEN_READ_ONLY)?;
+            OpenFlags::SQLITE_OPEN_READ_ONLY
+            | OpenFlags::SQLITE_OPEN_NO_MUTEX)?;
 
         let mut tagdict = TagDict::new();
         tagdict.decode(&con);
