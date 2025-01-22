@@ -167,7 +167,7 @@ jobs:
       - name: Publish to PyPI
         uses: PyO3/maturin-action@v1
         with:
-          eommand: upload
+          command: upload
           args: --non-interactive --skip-existing wheels-*/*
 
   publish-gh-release:
