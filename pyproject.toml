@@ -1,23 +1,31 @@
 [project]
 name = "aup3conv"
 description = "Scrape Audacity project files"
-python-requires = ">=3.11"
+license = { text="LICENSE" }
+authors = [{ name = "Michael Blaß", email = "m.blass@uke.de" }]
 dynamic = ["version"]
 readme = "README.md"
+requires-python = ">=3.11"
 keywords = ["audio", "analysis", "audacity", "parsing"]
-
-[authors]
-name = "Michael Blaß"
-email = "m.blass@uke.de"
-
 classifiers = [
-    "Programming Language :: Rust",
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: POSIX",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
+    "Programming Language :: Rust",
+    "Topic :: Multimedia :: Sound/Audio :: Conversion",
+    "Topic :: Multimedia :: Sound/Audio",
 ]
 
-[urls]
-repository = "https://github.com/UKEIAM/aup3conv"
+[project.urls]
+source = "https://github.com/UKEIAM/aup3conv"
 
 [build-system]
 requires = ["maturin>=1.5,<2.0"]
